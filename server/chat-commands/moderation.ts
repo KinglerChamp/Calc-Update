@@ -694,13 +694,18 @@ export const commands: Chat.ChatCommands = {
 		}
 		this.addModAction(`${targetUser.name} was muted by ${user.name} for ${Chat.toDurationString(muteDuration)}.${(publicReason ? ` (${publicReason})` : ``)}`);
 		this.modlog(`${cmd.includes('h') ? 'HOUR' : ''}MUTE`, targetUser, privateReason);
+		this.update(); // force an update so the (hide lines from x user) message is on the mod action above
+
+		const ids = [targetUser.getLastId()];
+		if (ids[0] !== toID(inputUsername)) {
+			ids.push(toID(inputUsername));
+		}
+		room.hideText(ids);
+
 		if (targetUser.autoconfirmed && targetUser.autoconfirmed !== targetUser.id) {
 			const displayMessage = `${targetUser.name}'s ac account: ${targetUser.autoconfirmed}`;
 			this.privateModAction(displayMessage);
 		}
-		const userid = targetUser.getLastId();
-		this.add(`|hidelines|unlink|${userid}`);
-		if (userid !== toID(inputUsername)) this.add(`|hidelines|unlink|${toID(inputUsername)}`);
 
 		room.mute(targetUser, muteDuration);
 	},
